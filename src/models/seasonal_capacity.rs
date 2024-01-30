@@ -1,20 +1,20 @@
 use crate::ode_solvers::ODESolver1;
 use ndarray::Array1;
 
-pub fn bacteria_growth(
+pub fn seasonal_capacity(
     ode_solver: ODESolver1,
     chart_drawer: fn(&str, &str, Vec<(Array1<f64>, Array1<f64>)>),
 ) {
-    let r = 1.5;
-    let (y0, tn, n_steps) = (0.1, 1., 100000);
-    let dn_by_dt = |_: f64, n: f64| r * n.powf(2. / 3.);
+    let (alpha, beta, gamma, k) = (0.8, 0.5, 1.5, 10.);
+    let (y0, tn, n_steps) = (2., 10., 1000000);
+    let dn_by_dt = |t: f64, n: f64| alpha * n * (1. - n * (1. + beta * f64::cos(gamma * t)) / k);
 
     let t = Array1::linspace(0., tn, n_steps);
     let nt = ode_solver.solve(dn_by_dt, tn / n_steps as f64, n_steps, &t, y0);
 
     chart_drawer(
-        "plots/bacteria_growth.png",
-        "Bacteria Growth in Petri Dish",
+        "plots/seasonal_capacity_model.png",
+        "Seasonal Capacity Model",
         vec![(t, nt)],
     );
 }

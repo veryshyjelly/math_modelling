@@ -1,24 +1,21 @@
-use crate::chart::draw_bitmap_line_chart;
-use crate::models::generalist_vs_specialist::generalist_vs_specialist_predator;
-use crate::models::{
-    bacteria_growth::bacteria_growth, constant_rate_harvesting::constant_rate_harvesting,
-    demographic::demographic, gompertz::gompertz, optimal_harvesting::optimal_harvesting,
-    seasonal_capacity::seasonal_capacity,
-};
-use crate::ode_solvers::{ODESolver1, SolverMethod};
+use chart::draw_bitmap_line_chart;
+use ode_solvers::{ODESolver1, ODESolver2, SolverMethod};
 
 mod chart;
 mod models;
 mod ode_solvers;
 
 fn main() {
-    let solver = ODESolver1::new(SolverMethod::Three8th);
+    // let solver = ODESolver1::new(SolverMethod::Three8th);
+    // models::bacteria_growth(solver, draw_bitmap_line_chart);
+    // models::gompertz(solver, draw_bitmap_line_chart);
+    // models::demographic(solver, draw_bitmap_line_chart);
+    // models::seasonal_capacity(solver, draw_bitmap_line_chart);
+    // models::constant_rate_harvesting(solver, draw_bitmap_line_chart);
+    // models::optimal_harvesting(solver, draw_bitmap_line_chart);
+    // models::generalist_vs_specialist_predator(solver, draw_bitmap_line_chart);
 
-    // bacteria_growth(solver, draw_bitmap_line_chart);
-    // gompertz(solver, draw_bitmap_line_chart);
-    // demographic(solver, draw_bitmap_line_chart);
-    // seasonal_capacity(solver, draw_bitmap_line_chart);
-    // constant_rate_harvesting(solver, draw_bitmap_line_chart);
-    // optimal_harvesting(solver, draw_bitmap_line_chart);
-    generalist_vs_specialist_predator(solver, draw_bitmap_line_chart);
+    let solver = ODESolver2::new(SolverMethod::Classic4);
+    // models::insect_pest_control(solver, draw_bitmap_line_chart);
+    models::lotka_volterra(solver, draw_bitmap_line_chart);
 }

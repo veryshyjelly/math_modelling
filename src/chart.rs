@@ -2,38 +2,43 @@ use ndarray::Array1;
 use plotters::backend::BitMapBackend;
 use plotters::chart::{ChartBuilder, LabelAreaPosition};
 use plotters::drawing::IntoDrawingArea;
+use plotters::element::PathElement;
 use plotters::prelude::IntoFont;
 use plotters::series::LineSeries;
-use plotters::style::{RGBColor, BLUE, CYAN, GREEN, MAGENTA, RED, WHITE, YELLOW};
+use plotters::style::{Color, RGBColor, BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, WHITE, YELLOW};
 
 const COLORS: [&RGBColor; 6] = [&RED, &GREEN, &BLUE, &YELLOW, &CYAN, &MAGENTA];
 
 pub fn draw_bitmap_line_chart(
     file_name: &str,
     caption: &str,
-    lines: Vec<(Array1<f64>, Array1<f64>)>,
+    lines: Vec<(Array1<f64>, Array1<f64>, &str)>,
 ) {
     let (x_min, x_max) = (
         lines
             .iter()
-            .map(|(x, _)| x.iter().rfold(0., |x, y| f64::min(x, *y)))
+            .map(|(x, _, _)| x.iter().rfold(0., |x, y| f64::min(x, *y)))
             .rfold(0., |x, y| f64::min(x, y)),
         lines
             .iter()
-            .map(|(x, _)| x.iter().rfold(0., |x, y| f64::max(x, *y)))
+            .map(|(x, _, _)| x.iter().rfold(0., |x, y| f64::max(x, *y)))
             .rfold(0., |x, y| f64::max(x, y)),
     );
+
+    println!("x max = {} min = {}", x_max, x_min);
 
     let (y_min, y_max) = (
         lines
             .iter()
-            .map(|(_, y)| y.iter().rfold(0., |x, y| f64::min(x, *y)))
+            .map(|(_, y, _)| y.iter().rfold(0., |x, y| f64::min(x, *y)))
             .rfold(0., |x, y| f64::min(x, y)),
         lines
             .iter()
-            .map(|(_, y)| y.iter().rfold(0., |x, y| f64::max(x, *y)))
+            .map(|(_, y, _)| y.iter().rfold(0., |x, y| f64::max(x, *y)))
             .rfold(0., |x, y| f64::max(x, y)),
     );
+
+    println!("y max = {} min = {}", y_max, y_min);
 
     let root_drawing_area = BitMapBackend::new(file_name, (1024, 768)).into_drawing_area();
     root_drawing_area.fill(&WHITE).unwrap();
@@ -47,9 +52,22 @@ pub fn draw_bitmap_line_chart(
 
     chart.configure_mesh().draw().unwrap();
 
-    for (i, (x, y)) in lines.into_iter().enumerate() {
+    for (i, (x, y, label)) in lines.into_iter().enumerate() {
+        println!("label: {}", label);
+        let color = COLORS[i % 6];
         chart
-            .draw_series(LineSeries::new(x.into_iter().zip(y), COLORS[i % 6]))
-            .unwrap();
+            .draw_series(LineSeries::new(x.into_iter().zip(y), color))
+            .unwrap()
+            .label(label)
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], color.clone()));
     }
+
+    chart
+        .configure_series_labels()
+        .background_style(&WHITE.mix(0.8))
+        .border_style(&BLACK)
+        .draw()
+        .unwrap();
+
+    root_drawing_area.present().unwrap();
 }
